@@ -17,15 +17,25 @@ async def root():
 
 
 class Query(BaseModel):
-    query: str
+    birthday: str
+    birthtime: str
+    birthplace: str
 
 
 @app.post("/query")
 async def query_anthropic(query: Query):
+    prompt = f"""
+        Hi Claude!
+        My birthday is {query.birthday},
+        my birthtime is {query.birthtime},
+        my birthplace is {query.birthplace}.
+        Can you give me my horoscope details?
+        Including my Zodiacs, houses and aspects.
+    """
     completion = anthropic.completions.create(
         model="claude-2",
-        max_tokens_to_sample=300,
-        prompt=f"{HUMAN_PROMPT} {query.query} {AI_PROMPT}",
+        max_tokens_to_sample=1000,
+        prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
     )
     print(completion.completion)
 
