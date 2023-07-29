@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
+import requests
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
 load_dotenv() # load environment variables from .env file
@@ -15,6 +16,25 @@ anthropic = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"),)
 async def root():
     return {"message": "Hello World"}
 
+
+def get_horoscope():
+    BASE_URL = 'https://astrology-api-3ipo.onrender.com/horoscope'
+
+    params = {
+        'time': '1993-08-06T20:50:00Z',
+        'latitude': '-33.41167',
+        'longitude': '-70.66647',
+        'houseSystem': 'P'
+    }
+
+    response = requests.get(BASE_URL, params=params)
+
+    # Convert the response to a Python dictionary
+    data = response.json()
+
+    # Now you can interact with the data as a normal dictionary
+    print(data)
+    return data
 
 class Query(BaseModel):
     birthday: str
@@ -38,6 +58,8 @@ async def query_anthropic(query: Query):
         prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
     )
     print(completion.completion)
-    print("end of completion")
+
+    horoscope = get_horoscope()
+    print(horoscope)
 
     return {"response": completion.completion}
