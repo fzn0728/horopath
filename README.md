@@ -9,3 +9,8 @@ Add the following to the .env file:
 ```
 ANTHROPIC_API_KEY=
 ```
+
+## how to run
+```
+uvicorn main:app --reload
+```
