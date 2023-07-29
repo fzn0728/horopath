@@ -38,5 +38,6 @@ async def query_anthropic(query: Query):
         prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
     )
     print(completion.completion)
+    print("end of completion")
 
     return {"response": completion.completion}
