@@ -18,7 +18,7 @@ async def root():
     return {"message": "Hello World"}
 
 @app.post("/query")
-async def query_anthropic(query: Query):
+async def query_astro_info(query: Query):
     horoscope = get_horoscope(Query)
     astro_tbl = extract_astro_table(horoscope)
     aspect_tbl = extract_aspects(horoscope)
