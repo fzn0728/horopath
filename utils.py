@@ -11,6 +11,8 @@ class Query(BaseModel):
     birthtime: str
     birthplace: str
 
+list_sign_names = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+                "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
 def get_horoscope(query: Query):
     # TODO (Renee): hard-coded to NYC coordinate for now. Find the right API for city -> coordinates
@@ -52,9 +54,7 @@ def get_sign_name(sign_number):
     # Replace this function with your own logic to map sign numbers to sign names.
     # For example, you can use a list or a dictionary to do the mapping.
     # Here, I'm just returning some placeholder sign names.
-    sign_names = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-                  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
-    return sign_names[sign_number - 1]
+    return list_sign_names[sign_number - 1]
 
 def extract_astro_table(input_json):
   output_json = {
@@ -62,29 +62,30 @@ def extract_astro_table(input_json):
   }
   encountered_signs = set()
 
-  for idx, house_data in enumerate(input_json['data']['houses']):
-      sign_name = get_sign_name(house_data["sign"])
-      if sign_name in encountered_signs:
-          continue
-
-      astro_entry = {
+  for sign_name in list_sign_names:
+    astro_entry = {
           "sign": sign_name,
           "planets": [],
-          "houses": idx+1
+          "houses": []
       }
-      encountered_signs.add(sign_name)
 
-      # ADD PLANETS
-      for astro, astro_data in input_json["data"]["astros"].items():
-          if astro_data["sign"] == house_data["sign"]:
-              astro_entry["planets"].append(astro)
+    # ADD HOUSES
+    for house_idx, house_data in enumerate(input_json['data']['houses']):
+        house_sign_name = get_sign_name(house_data["sign"])
+        if house_sign_name == sign_name:
+            astro_entry["houses"].append(house_idx+1)
 
-      # ADD ASCENDANT      
-      axe_asc_data = input_json['data']['axes']['asc']
-      if axe_asc_data["sign"] == house_data["sign"]:
-          astro_entry["planets"].append("ascendant")
+    # ADD PLANETS
+    for astro, astro_data in input_json["data"]["astros"].items():
+        if get_sign_name(astro_data["sign"]) == sign_name:
+            astro_entry["planets"].append(astro)
 
-      output_json["astro_table"].append(astro_entry)
+    # ADD ASCENDANT      
+    axe_asc_data = input_json['data']['axes']['asc']
+    if get_sign_name(axe_asc_data["sign"]) == sign_name:
+        astro_entry["planets"].append("ascendant")
+
+    output_json["astro_table"].append(astro_entry)
   return output_json
 
 def extract_aspects(input_json):

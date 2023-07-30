@@ -19,7 +19,6 @@ def main():
     claude_output = get_astro_summary(anthropic, astro_tbl)
 
     resp_json =  {**astro_tbl, **aspect_tbl, **claude_output}
-    print(resp_json)
 
 if __name__ == "__main__":
     main()
