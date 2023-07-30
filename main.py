@@ -19,7 +19,7 @@ async def root():
 
 @app.post("/query")
 async def query_astro_info(query: Query):
-    horoscope = get_horoscope(Query)
+    horoscope = get_horoscope(query)
     astro_tbl = extract_astro_table(horoscope)
     aspect_tbl = extract_aspects(horoscope)
     claude_output = get_top_summary(anthropic, astro_tbl)
