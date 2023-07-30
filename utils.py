@@ -11,6 +11,11 @@ class Query(BaseModel):
     birthtime: str
     birthplace: str
 
+class Query2(BaseModel):
+    question: str
+    astro_table: dict
+    aspect: dict
+
 list_sign_names = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
                 "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
@@ -119,6 +124,20 @@ def get_astro_summary_prompt(input_json_astro_tbl: dict) -> str:
     Output json (Please wrap the json code with <json>):
     '''
 
+def get_astro_answer_prompt(q:Query2) -> str:
+    astro_tbl_str = json.dumps(q.astro_table)
+    aspect_str = json.dumps(q.aspect)
+
+    return f'''
+    Hey Claude! you are an expert in horoscope and very inspirational helper that try to give people encouragement and guide them through their problems. Given the user's sign/planet/house/aspect information, as well as the input question, can you curated an answer to user's question? Be sure to use the horoscope knowledge to answer, and the tune should be positive.
+
+    User's sign: {astro_tbl_str}
+    User's aspect: {aspect_str}
+    User's question: {q.question}
+
+    Answer: 
+    '''
+
 def get_astro_summary(anthropic_session, input_json_astro_tbl):
     prompt = get_astro_summary_prompt(input_json_astro_tbl)
     
@@ -130,3 +149,14 @@ def get_astro_summary(anthropic_session, input_json_astro_tbl):
     response = completion.completion
     json_resp = response.split('<json>')[1].split('</json>')[0]
     return {"descriptions" : json.loads(json_resp)}
+
+def get_astro_answer(anthropic_session, q):
+    prompt = get_astro_answer_prompt(q)
+    
+    completion = anthropic_session.completions.create(
+        model="claude-2",
+        max_tokens_to_sample=1000,
+        prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
+    )
+    response = completion.completion
+    return {"response" : response}

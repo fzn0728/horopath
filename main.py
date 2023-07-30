@@ -27,3 +27,8 @@ async def query_astro_info(query: Query):
     resp_json =  {**astro_tbl, **aspect_tbl, **claude_output}
 
     return {"response": resp_json}
+
+@app.post("/query2")
+async def query_astro_answer(q: Query2):
+    claude_answer = get_astro_answer(anthropic, q)
+    return claude_answer
