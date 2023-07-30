@@ -31,4 +31,4 @@ async def query_astro_info(query: Query):
 @app.post("/query2")
 async def query_astro_answer(q: Query2):
     claude_answer = get_astro_answer(anthropic, q)
-    return claude_answer
+    return {"response": claude_answer}

@@ -115,7 +115,7 @@ def get_astro_summary_prompt(input_json_astro_tbl: dict) -> str:
     json_str = json.dumps(input_json_astro_tbl, indent=4)  # For pretty print
     
     return f'''
-    Hey Claude, you are an expert in horoscope. Based on the provided json regarding the planet, zodiacs and house information, can you output the sun, moon and ascendant information, in a json struct like [{{"header": "Sun in Leo", "short_summary": "A short summary about the reading on the planet", "Long description": "A long description expanding on the short summary"}}, {{...}}]?
+    Hey Claude, you are an expert in horoscope. Based on the provided json regarding the planet, zodiacs and house information, can you output the sun, moon and ascendant information, in a json struct like [{{"header": "Sun in Leo", "short_summary": "A short summary about the reading on the planet", "long_description": "A long description expanding on the short summary"}}, {{...}}]?
 
     Input info:
 
@@ -129,13 +129,13 @@ def get_astro_answer_prompt(q:Query2) -> str:
     aspect_str = json.dumps(q.aspect)
 
     return f'''
-    Hey Claude! you are an expert in horoscope and very inspirational helper that try to give people encouragement and guide them through their problems. Given the user's sign/planet/house/aspect information, as well as the input question, can you curated an answer to user's question? Be sure to use the horoscope knowledge to answer, and the tune should be positive.
+    Hey Claude! you are an expert in horoscope and very inspirational helper that try to give people encouragement and guide them through their problems. Given the user sign/planet/house/aspect information, as well as the input question, can you curated answers to user's question? Be sure to use the horoscope knowledge to answer, and the tune should be positive. Answer in below json construct: [{{"short_summary": "a short summary of your answer", "long_description": "a more elaborated version of your answer"}}]
 
     User's sign: {astro_tbl_str}
     User's aspect: {aspect_str}
     User's question: {q.question}
 
-    Answer: 
+    Output json (Please wrap the json code with <json>):
     '''
 
 def get_astro_summary(anthropic_session, input_json_astro_tbl):
@@ -159,4 +159,5 @@ def get_astro_answer(anthropic_session, q):
         prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
     )
     response = completion.completion
-    return {"response" : response}
+    json_resp = response.split('<json>')[1].split('</json>')[0]
+    return {"answer" : json_resp}
