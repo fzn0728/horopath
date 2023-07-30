@@ -160,4 +160,4 @@ def get_astro_answer(anthropic_session, q):
     )
     response = completion.completion
     json_resp = response.split('<json>')[1].split('</json>')[0]
-    return {"answer" : json_resp}
+    return {"answer" : json.loads(json_resp)}
