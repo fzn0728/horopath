@@ -49,20 +49,20 @@ def extract_astro_table(input_json):
 
       astro_entry = {
           "sign": sign_name,
-          "astros": [],
+          "planets": [],
           "houses": idx+1
       }
       encountered_signs.add(sign_name)
 
-      # ADD ASTROS
-      for astro, astro_data in input_json["data"]["astros"].items():
+      # ADD PLANETS
+      for astro, astro_data in input_json["data"]["planets"].items():
           if astro_data["sign"] == house_data["sign"]:
-              astro_entry["astros"].append(astro)
+              astro_entry["planets"].append(astro)
 
       # ADD ASCENDANT      
       axe_asc_data = input_json['data']['axes']['asc']
       if axe_asc_data["sign"] == house_data["sign"]:
-          astro_entry["astros"].append("ascendant")
+          astro_entry["planets"].append("ascendant")
 
       output_json["astro_table"].append(astro_entry)
   return output_json
