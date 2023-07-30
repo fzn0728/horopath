@@ -8,6 +8,9 @@ class Query(BaseModel):
     birthtime: str
     birthplace: str
 
+class Query2(BaseModel):
+    test: str
+
 
 def get_horoscope(query: Query):
     BASE_URL = 'https://astrology-api-3ipo.onrender.com/horoscope'

@@ -28,3 +28,10 @@ async def query_astro_info(query: Query):
     print(resp_json)
 
     return {"response": resp_json}
+
+@app.post("/query2")
+async def query2(q: Query2):
+    print("this is query2")
+    print(q.test)
+
+    return {"response": f"this is query2 {q.test}"}
