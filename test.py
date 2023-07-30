@@ -17,7 +17,6 @@ def main():
     astro_tbl = extract_astro_table(horoscope)
     aspect_tbl = extract_aspects(horoscope)
     claude_summary = get_astro_summary(anthropic, astro_tbl)
-    print(claude_summary)
 
     resp_json =  {**astro_tbl, **aspect_tbl, **claude_summary}
 
@@ -28,7 +27,6 @@ def main():
         aspect = aspect_tbl
     )
     claude_answer = get_astro_answer(anthropic, query2)
-    print(claude_answer)
 
 if __name__ == "__main__":
     main()
