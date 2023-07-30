@@ -110,15 +110,46 @@ def extract_aspects(input_json):
                 output_json['aspects'].append(simplified_aspect)
     return output_json
     
-# without few-shots, hard to force it only output json
 def get_astro_summary_prompt(input_json_astro_tbl: dict) -> str:
     json_str = json.dumps(input_json_astro_tbl, indent=4)  # For pretty print
     
     return f'''
     Hey Claude, you are an expert in horoscope. Based on the provided json regarding the planet, zodiacs and house information, can you output the sun, moon and ascendant information, in a json struct like [{{"header": "Sun in Leo", "short_summary": "A short summary about the reading on the planet", "long_description": "A long description expanding on the short summary"}}, {{...}}]?
 
-    Input info:
+    Example Input info:
+    {{'astro_table': [{{'sign': 'Pisces',
+   'astros': ['saturn', 'ascendant'],
+   'houses': 1}},
+    {{'sign': 'Aries', 'astros': [], 'houses': 2}},
+    {{'sign': 'Taurus', 'astros': [], 'houses': 3}},
+    {{'sign': 'Gemini', 'astros': ['moon', 'lilith'], 'houses': 4}},
+    {{'sign': 'Cancer', 'astros': [], 'houses': 5}},
+    {{'sign': 'Leo', 'astros': [], 'houses': 6}},
+    {{'sign': 'Virgo', 'astros': ['sun', 'vesta', 'pallas'], 'houses': 7}},
+    {{'sign': 'Libra',
+    'astros': ['mercury', 'venus', 'chiron', 'ceres'],
+    'houses': 8}},
+    {{'sign': 'Scorpio', 'astros': ['mars', 'pluto'], 'houses': 9}},
+    {{'sign': 'Sagittarius', 'astros': ['jupiter', 'juno'], 'houses': 10}},
+    {{'sign': 'Capricorn', 'astros': ['uranus', 'neptune'], 'houses': 11}},
+    {{'sign': 'Aquarius', 'astros': [], 'houses': 12}}]}}
+    
+    Example output json:
+    <json>{{'descriptions': [{{'header': 'Sun in Virgo',
+   'short_summary': 'You are particularly smart, responsible, hard-working, and self-sacrificing.',
+   'long_description': 'The sun determines your ego, identity, and "role" in life. It's the core of who you are, and is the sign you're most likely to already know. Your Sun is in Virgo, meaning you are particularly smart, responsible, hard-working, and self-sacrificing. You're thorough, meticulous, and intentional in everything you do—you can accomplish things that most people can't, but may also get bogged down by the details of your day-to-day. You have a need to be wholesome.
+    It's in your seventh house, meaning you feel the need to distinguish yourself from others through close relationships and long-term partnerships.'}},
+    {{'header': 'Moon in Gemini',
+    'short_summary': 'Your emotional self is often restless and unsettled',
+    'long_description': 'The moon rules your emotions, moods, and feelings. This is likely the sign you most think of yourself as, since it reflects your personality when you're alone or deeply comfortable. Your Moon is in Gemini, meaning your emotional self is often restless and unsettled. You're extremely adaptable, which sometimes makes you feel pulled in too many directions. You are easily bored and need to feel like you are free to be creative and create meaning, which can make you feel like you're in a constant identity crisis.
+    It's in your fourth house, meaning you find security and safety through your home and family.'}},
+    {{'header': 'Ascendant in Pisces',
+    'short_summary': 'You come across as kind, dreamy, imaginative, and sensitive',
+    'long_description': 'Your ascendant is the "mask" you present to people. It can be seen in your personal style and how you come off to people when you first meet. Some say it becomes less relevant as you get older. It changes every two hours, so if it doesn't make sense, reconfirm your birth time to be sure. Your Ascendant is in Pisces, meaning you come across as kind, dreamy, imaginative, and sensitive. Most of your actions seem subtle and non-aggressive, and you may sometimes come off as indecisive.'}}]}}
+    </json>
 
+    ---------------------------------------------
+    Input info:
     {json_str}
 
     Output json (Please wrap the json code with <json>):
@@ -129,7 +160,7 @@ def get_astro_answer_prompt(q:Query2) -> str:
     aspect_str = json.dumps(q.aspect)
 
     return f'''
-    Hey Claude! you are an expert in horoscope and very inspirational helper that try to give people encouragement and guide them through their problems. Given the user sign/planet/house/aspect information, as well as the input question, can you curated answers to user's question? Be sure to use the horoscope knowledge to answer, and the tune should be positive. Answer in below json construct: [{{"short_summary": "a short summary of your answer", "long_description": "a more elaborated version of your answer"}}]
+    Hey Claude! you are an expert in horoscope and very inspirational helper that try to give people encouragement and guide them through their problems. Given the user sign/planet/house/aspect information, as well as the input question, can you curated answers to user's question? Be sure to use the horoscope knowledge to answer, and the tune should be positive. Answer in below json construct: [{{"short_summary": "a short summary of your answer (one sentence)", "long_description": "a paragraph of longer more elaborated version of your answer"}}]
 
     User's sign: {astro_tbl_str}
     User's aspect: {aspect_str}
