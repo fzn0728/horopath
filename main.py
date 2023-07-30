@@ -22,9 +22,8 @@ async def query_astro_info(query: Query):
     horoscope = get_horoscope(query)
     astro_tbl = extract_astro_table(horoscope)
     aspect_tbl = extract_aspects(horoscope)
-    claude_output = get_top_summary(anthropic, astro_tbl)
+    claude_output = get_astro_summary(anthropic, astro_tbl)
 
     resp_json =  {**astro_tbl, **aspect_tbl, **claude_output}
-    print(resp_json)
 
     return {"response": resp_json}

@@ -2,6 +2,9 @@ from pydantic import BaseModel
 import json
 import requests
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from timezonefinder import TimezoneFinder
+from datetime import datetime
+import pytz
 
 class Query(BaseModel):
     birthday: str
@@ -10,12 +13,30 @@ class Query(BaseModel):
 
 
 def get_horoscope(query: Query):
+    # TODO (Renee): hard-coded to NYC coordinate for now. Find the right API for city -> coordinates
+    def _convertCoordinate(bplace):
+        lat = 40.7128
+        lng = -74.0060
+        return lat, lng
+
+    def _convertTimeZone(lat, lng, bday, btime):
+        tf = TimezoneFinder()
+        # Use the timezone_at method to get the timezone name
+        timezone_str = tf.timezone_at(lat=lat, lng=lng)
+        time_obj = datetime.strptime(bday + btime, '%Y%m%d%H%M')
+        time_obj = pytz.timezone(timezone_str).localize(time_obj)
+        # Convert the localized datetime object to UTC
+        time_obj_utc = time_obj.astimezone(pytz.UTC).isoformat()
+        return time_obj_utc.replace('+00:00', '') + 'Z'
+
     BASE_URL = 'https://astrology-api-3ipo.onrender.com/horoscope'
-    # use fixed right now. TODO replace to query context
+    lati, lngi = _convertCoordinate(query.birthplace)
+    time = _convertTimeZone(lati, lngi, query.birthday, query.birthtime)
     params = {
-        'time': '1993-08-06T20:50:00Z',
-        'latitude': '-33.41167',
-        'longitude': '-70.66647',
+        'time': time,
+        # fixed the city to be NYC for now
+        'latitude': str(lati),
+        'longitude': str(lngi),
         'houseSystem': 'P'
     }
 
@@ -23,7 +44,6 @@ def get_horoscope(query: Query):
 
     # Convert the response to a Python dictionary
     data = response.json()
-
     # Now you can interact with the data as a normal dictionary
     return data
 
@@ -55,7 +75,7 @@ def extract_astro_table(input_json):
       encountered_signs.add(sign_name)
 
       # ADD PLANETS
-      for astro, astro_data in input_json["data"]["planets"].items():
+      for astro, astro_data in input_json["data"]["astros"].items():
           if astro_data["sign"] == house_data["sign"]:
               astro_entry["planets"].append(astro)
 
@@ -85,7 +105,7 @@ def extract_aspects(input_json):
     return output_json
     
 # without few-shots, hard to force it only output json
-def get_top_summary_prompt(input_json_astro_tbl: dict) -> str:
+def get_astro_summary_prompt(input_json_astro_tbl: dict) -> str:
     json_str = json.dumps(input_json_astro_tbl, indent=4)  # For pretty print
     
     return f'''
@@ -98,8 +118,8 @@ def get_top_summary_prompt(input_json_astro_tbl: dict) -> str:
     Output json (Please wrap the json code with <json>):
     '''
 
-def get_top_summary(anthropic_session, input_json_astro_tbl):
-    prompt = get_top_summary_prompt(input_json_astro_tbl)
+def get_astro_summary(anthropic_session, input_json_astro_tbl):
+    prompt = get_astro_summary_prompt(input_json_astro_tbl)
     
     completion = anthropic_session.completions.create(
         model="claude-2",
@@ -107,6 +127,5 @@ def get_top_summary(anthropic_session, input_json_astro_tbl):
         prompt=f"{HUMAN_PROMPT} {prompt} {AI_PROMPT}",
     )
     response = completion.completion
-    print(response)
     json_resp = response.split('<json>')[1].split('</json>')[0]
     return {"descriptions" : json.loads(json_resp)}
